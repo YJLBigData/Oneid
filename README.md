@@ -18,7 +18,7 @@
 - `src/config.py`: MySQL 连接配置
 - `src/mysql_cli.py`: MySQL CLI 调用封装
 - `src/init_schema.py`: 初始化表结构
-- `src/migrate_database.py`: 全量迁移数据库中的基础表
+- `src/migrate_database.py`: 只迁移 OneID 项目相关表，并清理目标库无关表
 - `src/generate_user_data.py`: 生成并写入随机测试数据
 - `src/run_oneid.py`: 运行 OneID 融合
 - `src/stats_report.py`: 输出 OneID 统计信息
@@ -74,11 +74,16 @@ cd /Users/yangjinlong/app/PythonProject/OneIdTest
 ./.venv/bin/python src/stats_report.py
 ```
 
-从旧库迁移全部基础表到新库 `oneid`：
+从旧库迁移 OneID 项目相关表到新库 `oneid`：
 
 ```bash
 ./.venv/bin/python src/migrate_database.py --source-db test --target-db oneid
 ```
+
+默认只保留以下项目表：
+
+- `user`
+- `oneid_result`
 
 ## 输出说明
 
@@ -110,6 +115,7 @@ mysql --protocol=TCP -hlocalhost -P3306 -uroot -ptoor -D oneid < sql/03_inspecti
 ## 注意事项
 
 - `src/init_schema.py` 会自动创建 `oneid` 数据库（如果不存在）
+- `src/migrate_database.py` 会清理 `oneid` 库中的无关表，只保留项目表
 - 每次执行 `src/run_all.py` 都会重建 `user` 和 `oneid_result` 表
 - 项目依赖 Python 标准库，无需额外安装第三方包
 - `user` 是 MySQL 关键字，SQL 中已统一使用反引号包裹
