@@ -19,14 +19,16 @@ class MySQLConfig:
             port=int(os.getenv("MYSQL_PORT", "3306")),
             user=os.getenv("MYSQL_USER", "root"),
             password=os.getenv("MYSQL_PASSWORD", "toor"),
-            database=os.getenv("MYSQL_DB", "test"),
+            database=os.getenv("MYSQL_DB", "oneid"),
             socket=socket,
         )
 
-    def mysql_args(self) -> list[str]:
-        args = ["mysql", f"-u{self.user}", f"-p{self.password}", self.database]
+    def mysql_args(self, include_database: bool = True) -> list[str]:
+        args = ["mysql", f"-u{self.user}", f"-p{self.password}"]
         if self.socket:
             args[1:1] = [f"--socket={self.socket}"]
         else:
             args[1:1] = ["--protocol=TCP", f"-h{self.host}", f"-P{self.port}"]
+        if include_database:
+            args.append(self.database)
         return args

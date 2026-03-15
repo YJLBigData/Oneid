@@ -42,6 +42,12 @@ def run_sql(sql: str, cfg: MySQLConfig | None = None) -> None:
     _run_mysql(args)
 
 
+def run_server_sql(sql: str, cfg: MySQLConfig | None = None) -> None:
+    cfg = cfg or MySQLConfig.from_env()
+    args = cfg.mysql_args(include_database=False) + ["--default-character-set=utf8mb4", "-e", sql]
+    _run_mysql(args)
+
+
 def run_sql_file(sql_file: Path, cfg: MySQLConfig | None = None) -> None:
     cfg = cfg or MySQLConfig.from_env()
     args = cfg.mysql_args() + ["--default-character-set=utf8mb4"]
@@ -51,6 +57,23 @@ def run_sql_file(sql_file: Path, cfg: MySQLConfig | None = None) -> None:
 def fetch_tsv(sql: str, cfg: MySQLConfig | None = None) -> list[list[str]]:
     cfg = cfg or MySQLConfig.from_env()
     args = cfg.mysql_args() + [
+        "--default-character-set=utf8mb4",
+        "--batch",
+        "--raw",
+        "--skip-column-names",
+        "-e",
+        sql,
+    ]
+    completed = _run_mysql(args)
+    rows: list[list[str]] = []
+    for line in completed.stdout.splitlines():
+        rows.append(line.split("\t"))
+    return rows
+
+
+def fetch_server_tsv(sql: str, cfg: MySQLConfig | None = None) -> list[list[str]]:
+    cfg = cfg or MySQLConfig.from_env()
+    args = cfg.mysql_args(include_database=False) + [
         "--default-character-set=utf8mb4",
         "--batch",
         "--raw",
